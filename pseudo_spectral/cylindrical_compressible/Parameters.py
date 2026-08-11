@@ -10,9 +10,11 @@ file2       =   'baseflowmyp'
 N	    =   200
 
 omegai      =   0.1
-omegaf      =   3.50
-domega	    = 	0.02
-iomega	    =	np.int(round((omegaf-omegai)/domega))
+#omegaf      =   3.50
+omegaf      =   2.10
+#domega	    = 	0.02
+domega	    = 	0.2
+iomega	    =	np.int64(round((omegaf-omegai)/domega))
 print(iomega)
 #iomega      =   128
 #maximum size r
