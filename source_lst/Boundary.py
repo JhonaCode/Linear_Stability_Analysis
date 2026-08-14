@@ -3,7 +3,7 @@ import numpy        as     np
 import source_lst.chebPy        as     ch
 
 
-def remove_lines(Wb,d2Wbdr,D,D2,deltaz,diffM,N,**kwargs): 
+def remove_lines(Wb,Rhob,D,D2,deltaz,diffM,N,**kwargs): 
     #The derivative matrix must be 
     #modified to put the boundary conditions and 
     # it will not be more useful to calculate the                                                                                       
@@ -12,7 +12,9 @@ def remove_lines(Wb,d2Wbdr,D,D2,deltaz,diffM,N,**kwargs):
     #Remove the first and the last row, 
     #due to the  use of central scheme
     Wb=Wb[1:N]
-    d2Wbdr=d2Wbdr[1:N]
+    Rhob=Rhob[1:N]
+
+    #d2Wbdr=d2Wbdr[1:N]
     
     #Use difference matrix
     #Remove the first and the last row, 
@@ -27,7 +29,7 @@ def remove_lines(Wb,d2Wbdr,D,D2,deltaz,diffM,N,**kwargs):
     
         ch.diff_Dirichlet(D,D2,deltaz,N) 
 
-    return Wb,d2Wbdr,D,D2
+    return Wb,Rhob,D,D2
 
 
 def boundary_condition_diff(A0,B0,DD,N):

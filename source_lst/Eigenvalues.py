@@ -1,16 +1,18 @@
 import numpy         as     np
+import  source_lst.Boundary  as bo
 from   scipy.linalg      import eig
-from   source_lst.Boundary      import *
 
-def eigenvalues_f(A0,B0,DD,N0,min_imag,max_imag,min_real,max_real):
+def eigenvalues_f(A0,B0,base_def,**kwargs):
 
-    #Boundary Conditions
-    #boundary_condition_diff(A0,B0,DD,N0)   
-    #boundary_condition(A0,B0,N0)   
+
+    min_imag=base_def["min_imag"]
+    max_imag=base_def["max_imag"]
+    min_real=base_def["min_real"]
+    max_real=base_def["max_real"]
 
     #Eingenvalues and Eingenvectors 
     #print(max_imag)
-        #Ap = kBp
+    #Ap = kBp
 
     eigvals, eigvecs = eig(A0,B0); 
 

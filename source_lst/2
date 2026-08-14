@@ -28,13 +28,11 @@ import    source_lst.Eigenvalues as eig
 from types import SimpleNamespace
 
 
-def define_analysis(D,D2,Wb,Rhob,analysis,**kwargs):
+def define_analysis(D,D2,Wb,Rhob,analysis,base_def,**kwargs):
 
      # Esta linha injeta TODO o seu dicionário 'para' no escopo global DESTE módulo
     #globals().update(kwargs)
     # se nao quero passar todos os parameters
-
-    base_def = kwargs.get('base_def')
 
     omegaf   = base_def['omegaf']
     omegaini = base_def['omegaini']
@@ -76,15 +74,12 @@ def spatial(D,D2,Wb,Rhob,omega,Equations,**kwargs):
 
     return
 
-def planche(D,D2,Wb,Rhob,omega,beta,N,**kwargs):
+def planche(D,D2,Wb,Rhob,omega,**kwargs):
 
-
-    base_def = kwargs.get('base_def')
 
     path =kwargs.get('path')
     file1=kwargs.get('file1')
     file2=kwargs.get('file2')
-
     #Spatial, Working 
     fl1      =   open('%s/eig_%s.dat'%(path,file1),'w+')
     fl2      =   open('%s/allspec_%s.dat'%(path,file2),'w+')
@@ -109,21 +104,24 @@ def planche(D,D2,Wb,Rhob,omega,beta,N,**kwargs):
     dWbdr       =   np.matmul(D,np.diag(Wb))
 
     #LESS_LIN EQUATION 
-    R_1        =   np.diag(1j*Wb*(1.0-Wb**2*aa))
+    R_1        =   np.diag(Wb*(1-1j*Wb**2*aa))
 
     L_2_1  =   np.matmul(np.diag(Wb),D2)                    \
-              - np.matmul(np.matmul(np.diag(Wb),dlnRhobdr),D)   \
-           	  - np.matmul(2.0*dWbdr,D)                      \
+              - np.matmul(np.diag(Wb)*dlnRhobdr,D)             \
+           	  - np.matmul(np.diag(2.0*dWbdr),D)             \
+              + np.matmul(np.diag(Wb)*dlnRhobdr,D)       \
               + np.diag(1j*Wb*beta**2.0)                    \
 
-    L_1_1   = np.matmul(dlnRhobdr,D)           
+    L_1_1   = np.matmul(np.diag(dlnRhobdr),D)           
+
+
+    i=0
 
 
     alphar=[]
     alphai=[]
     neig  =[]
 
-    i=0
     for iomega in omega: 
 
         #Evaluating several \omega
@@ -137,8 +135,8 @@ def planche(D,D2,Wb,Rhob,omega,beta,N,**kwargs):
         
         L_1     =   np.multiply(iomega*beta**2,I)          \
                 +   np.multiply(iomega**3.0*1j*(aa),I)          \
-                -   iomega*D2                                   \
-                -   iomega*L_1_1           
+                +   iomega*D2                                   \
+                -   L_1_1           
         
         A0   	=   np.block([[  I  ,  Z  ,  Z   ],       \
                               [  Z  ,  I  ,  Z   ],       \
@@ -155,33 +153,26 @@ def planche(D,D2,Wb,Rhob,omega,beta,N,**kwargs):
 
         alphari,alphaii,neigi    = eig.eigenvalues_f(A0,B0,**kwargs)
 
-        #"""
         if neigi>0:
-
-            print(neigi)
 
             ##Print the most unstable eigenvalue
             print("omega,alpha_i,"  ,iomega,alphaii[0])
 
             fl1.write("%f\t%f\t%f\n"%(iomega,alphari[0],alphaii[0])); 
 
-            for k in range(0,neigi): 
+        for k in range(0,neigi): 
 
-                fl2.write("%f\t%f\t%f\n"%(iomega,alphari[k],alphaii[k])); 
+            fl2.write("%f\t%f\t%f\n"%(iomega,alphari[k],alphaii[k])); 
 
-        #"""
         plt.plot(alphari,alphaii,'b*')
-        plt.show()
 
-        alphar.append(alphari)
-        alphai.append(alphaii)
-        neig.append(neigi)
+        #alphar.append(alphari)
+        #alphai.append(alphaii)
+        #neig.append(neigi)
 
         i+=1
 
-    plt.show()
-
-    return alphar,alphai#,neigi
+    return alphar,alphai,neigi
 
 def incompressible(D,D2,Wb,d2Wbdr,omega,**kwargs): 
 

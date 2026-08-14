@@ -10,8 +10,11 @@ import numpy as np
 import math  as mt
 #from math import exp, expm1
 import matplotlib.pyplot as plt
+
 #from sci to make fft
 import scipy.fftpack
+
+import xarray as xr
 ################################
 # letura de aquivos para obter as transformadas
 # number of frequency files 
@@ -147,7 +150,7 @@ def Baseflow_hu(r,NN):
 
     return Wb,Tb,Rhob,Y1,Y2
 
-def Baseflow_morris_mixing(r,D,D2,L,N,**kwargs):
+def morris_mixing(r,D,D2,L,N,**kwargs):
 
     #NN = number of spectral points
     #r  = Vertical coordinate. 
@@ -214,3 +217,68 @@ def Baseflow_morris_mixing(r,D,D2,L,N,**kwargs):
     #pl.plot(Rhob,r,'*-',a,r,'*-')
 
     return Wb,dWbdr,d2Wbdr,Tb,Rhob,Y1,Y2
+
+def reacting_mixing_layer(r,D,D2,L,N,**kwargs):
+
+    """
+    Load file of base flow obtained 
+    from the solution of the Boundary layer 
+    for a reacting mixing layer follow the 
+    Planchê work.
+    """
+
+    # 1. Carregar o arquivo NetCDF (certifique-se de que o caminho do arquivo está correto)
+    path_baseflow= "/pesq/dados/bamc/jhonatan.aguirre/git_repositories/Combustao/Base_flow/"  # ou o nome que você deu ao salvar
+
+    #print(path_baseflow)
+    ds = xr.open_dataset(path_baseflow+'reacting_mixing_layer_base_flow.nc')
+
+    # 2. Interpolar o dataset original usando o novo vetor
+    # Sintaxe: nome_da_coordenada_no_dataset = novo_vetor
+    bf= ds.interp(r=r, method="cubic")
+
+    """
+    plt.plot(ds.U,ds.r ,'+',color='red',label='Shooting' )
+    plt.plot(bf.U,r,'*',color='blue' ,label='Cheb')
+    plt.legend()
+    plt.show()
+    """
+    #NN = number of spectral points
+    #r  = Vertical coordinate. 
+
+    #Displacement
+
+    Wb      =   ds.U 
+
+    Tb      =   ds.T
+
+    YF      =   ds.Y_F 
+
+    YO      =   ds.Y_O
+
+    YP      =   ds.Y_P
+
+    Rhob    =   1.0/Tb
+
+    #To Calculated the derivatives 
+    #of the base flow, necessary in the 
+    #Less_lin equation. 
+    
+    #dWbdr   =   np.dot(D,Wb)
+    #d2Wbdr  =   np.dot(D2,Wb)
+    #dlnRhobdr   =   np.dot(D,np.log(Rhob))
+
+    #plt.plot(Wb,r,'b*-')
+    #plt.plot(np.dot(D,Wb),r,'*r',dwa,r,'-b')
+    #plt.plot(np.dot(D2,Wb),r,'*r',d2wa,r,'-b')
+    #plt.axis([-2.0, 2.0, -10.0, 10.0])
+    #plt.show()
+    #exit()
+
+    #pl.figure()
+    #pl.figure()
+    #pl.plot(Wb,r,'*-',a,r,'*-')
+    #pl.plot(Rhob,r,'*-',a,r,'*-')
+
+    #return Wb,dWbdr,d2Wbdr,dlnRhobdr,Y1,Y2,Y3
+    return Wb,Rhob,YF,YO,YP
